@@ -1,58 +1,53 @@
 package br.unisantos.financas.service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.unisantos.financas.model.Conta;
+import br.unisantos.financas.repository.ContaRepository;
 
 @Service
-public class ContaService {
-    private static List<Conta> contas = new ArrayList<>();
-    private static Long nextId = 1L;
+public class ContaService implements ServiceInterface<Conta> {
 
+	@Autowired
+	private ContaRepository repository;
+	
     public ContaService() {}
 
-    public void create(Conta conta) {
-       conta.setId(nextId++);
-       contas.add(conta);
-    }
-    public List<Conta> findAll() {
-        return contas;
-    }
-
-    public Conta find(Conta conta) {
-        for (Conta c : contas) {
-            if (c.equals(conta)) {
-                return c;
-            }
-        }
-        return null;
-    }
-
-    public Conta find(Long id) {
-        return find(new Conta(id));
+    @Override
+    public Conta create(Conta conta) {
+    	return repository.save(conta);
     }
     
+    @Override
+    public List<Conta> findAll() {
+        return repository.findAll();
+    }
+
+    @Override
+    public Conta findById(Long id) {
+    	Optional<Conta> _conta = repository.findById(id);
+        return _conta.orElse(null);
+    }
+    
+    @Override
     public boolean update(Conta conta) {
-        Conta _conta = find(conta);
-        if (_conta != null) {
-            _conta.setAgencia(conta.getAgencia());
-            _conta.setNumero(conta.getNumero());
-            _conta.setTitular(conta.getTitular());
-            _conta.setSaldo(conta.getSaldo());
-            return true;
-        }
+    	if (repository.existsById(conta.getId())) {
+    		repository.save(conta);
+    		return true;
+    	}
         return false;
     }
 
+    @Override
     public boolean delete(Long id) {
-        Conta _conta = find(id);
-        if (_conta != null) {
-            contas.remove(_conta);
-            return true;
-        }
-        return false;
+    	if (repository.existsById(id)) {
+    		repository.deleteById(id);
+    		return true;
+    	}
+    	return false;
     }
 }

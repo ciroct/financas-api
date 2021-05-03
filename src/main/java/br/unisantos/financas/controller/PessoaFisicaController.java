@@ -14,42 +14,42 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.unisantos.financas.model.Conta;
-import br.unisantos.financas.service.ContaService;
+import br.unisantos.financas.model.PessoaFisica;
+import br.unisantos.financas.service.PessoaFisicaService;
 
 @RestController
-@RequestMapping("/contas")
-public class ContaController implements ControllerInterface<Conta>{
+@RequestMapping("/pessoas_fisicas")
+public class PessoaFisicaController implements ControllerInterface<PessoaFisica>{
     @Autowired
-    private ContaService service;
+    private PessoaFisicaService service;
 
     @GetMapping
     @Override
-    public ResponseEntity<List<Conta>> getAll() {
+    public ResponseEntity<List<PessoaFisica>> getAll() {
         return ResponseEntity.ok(service.findAll());
     }
 
     @GetMapping(value = "/{id}")
     @Override
     public ResponseEntity<?> get(@PathVariable("id") Long id) {
-        Conta _conta = service.findById(id);
-        if (_conta != null)
-            return ResponseEntity.ok(_conta);
+        PessoaFisica _obj = service.findById(id);
+        if (_obj != null)
+            return ResponseEntity.ok(_obj);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
     @PostMapping
     @Override
-    public ResponseEntity<Conta> post(@RequestBody Conta conta) {
-        service.create(conta);
-        return ResponseEntity.ok(conta);
+    public ResponseEntity<PessoaFisica> post(@RequestBody PessoaFisica obj) {
+        service.create(obj);
+        return ResponseEntity.ok(obj);
     }
 
     @PutMapping
     @Override
-    public ResponseEntity<?> put(@RequestBody Conta conta) {
-        if (service.update(conta)) {
-            return ResponseEntity.ok(conta);
+    public ResponseEntity<?> put(@RequestBody PessoaFisica obj) {
+        if (service.update(obj)) {
+            return ResponseEntity.ok(obj);
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
