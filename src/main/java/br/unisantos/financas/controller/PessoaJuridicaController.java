@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.unisantos.financas.exception.AuthorizationException;
 import br.unisantos.financas.model.PessoaJuridica;
 import br.unisantos.financas.service.PessoaJuridicaService;
 
@@ -22,7 +24,7 @@ import br.unisantos.financas.service.PessoaJuridicaService;
 public class PessoaJuridicaController implements ControllerInterface<PessoaJuridica>{
     @Autowired
     private PessoaJuridicaService service;
-
+    
     @GetMapping
     @Override
     public ResponseEntity<List<PessoaJuridica>> getAll() {
@@ -32,10 +34,14 @@ public class PessoaJuridicaController implements ControllerInterface<PessoaJurid
     @GetMapping(value = "/{id}")
     @Override
     public ResponseEntity<?> get(@PathVariable("id") Long id) {
-        PessoaJuridica _obj = service.findById(id);
-        if (_obj != null)
-            return ResponseEntity.ok(_obj);
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    	try {
+	        PessoaJuridica _obj = service.findById(id);
+	        if (_obj != null)
+	            return ResponseEntity.ok(_obj);
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    	} catch (AuthorizationException e) {
+    		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    	}
     }
 
     @PostMapping
@@ -49,6 +55,7 @@ public class PessoaJuridicaController implements ControllerInterface<PessoaJurid
     @Override
     public ResponseEntity<?> put(@RequestBody PessoaJuridica obj) {
         if (service.update(obj)) {
+        	
             return ResponseEntity.ok(obj);
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -56,6 +63,7 @@ public class PessoaJuridicaController implements ControllerInterface<PessoaJurid
 
     @DeleteMapping(value = "/{id}")
     @Override
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<?> delete(@PathVariable("id") Long id) {
         if (service.delete(id)) {
             return ResponseEntity.ok().build();

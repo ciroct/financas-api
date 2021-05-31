@@ -29,7 +29,7 @@ public class UserDetailsImpl implements UserDetails {
 		this.authorities = perfis.stream().map(x -> new SimpleGrantedAuthority(x.getDescricao()))
 				.collect(Collectors.toList());
 	}
-	
+
 	public Long getId() {
 		return id;
 	}
@@ -69,4 +69,8 @@ public class UserDetailsImpl implements UserDetails {
 		return true;
 	}
 
+	public boolean hasRole(TipoPerfil perfil) {
+		return getAuthorities()
+				.contains(new SimpleGrantedAuthority(perfil.getDescricao()));
+	}
 }

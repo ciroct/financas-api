@@ -7,8 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import br.unisantos.financas.exception.AuthorizationException;
 import br.unisantos.financas.model.PessoaJuridica;
 import br.unisantos.financas.repository.PessoaJuridicaRepository;
+import br.unisantos.financas.security.JWTUtil;
 
 @Service
 public class PessoaJuridicaService implements ServiceInterface<PessoaJuridica> {
@@ -18,6 +20,9 @@ public class PessoaJuridicaService implements ServiceInterface<PessoaJuridica> {
 	
 	@Autowired
 	private BCryptPasswordEncoder passwordEncoder;
+	
+	@Autowired
+	private JWTUtil jwtUtil;
 	
     public PessoaJuridicaService() {}
 
@@ -33,7 +38,10 @@ public class PessoaJuridicaService implements ServiceInterface<PessoaJuridica> {
     }
 
     @Override
-    public PessoaJuridica findById(Long id) {
+    public PessoaJuridica findById(Long id) throws AuthorizationException {
+    	if (!jwtUtil.authorized(id)) {
+    		throw new AuthorizationException("Acesso negado!");
+    	}
     	Optional<PessoaJuridica> _obj = repository.findById(id);
         return _obj.orElse(null);
     }
@@ -41,6 +49,7 @@ public class PessoaJuridicaService implements ServiceInterface<PessoaJuridica> {
     @Override
     public boolean update(PessoaJuridica obj) {
     	if (repository.existsById(obj.getId())) {
+        	obj.setSenha(passwordEncoder.encode(obj.getSenha()));
     		repository.save(obj);
     		return true;
     	}
